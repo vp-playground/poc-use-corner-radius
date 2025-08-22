@@ -63,6 +63,8 @@ const styles = {
 const App: React.FC = () => {
   const [radiusInput, setRadiusInput] = useState(9999); // large default => circle
   const { ref: boxRef, sx: radiusSx } = useCornerRadius(radiusInput);
+  // Keep an internal label but don't re-render on every keystroke inside the contentEditable element
+  // to avoid caret jumping to the start. We'll only commit text on blur.
   const [text, setText] = useState("Corner Radius");
   // sizing states
   const [heightValue, setHeightValue] = useState("28px");
@@ -187,9 +189,10 @@ const App: React.FC = () => {
           }}
           contentEditable
           suppressContentEditableWarning
-          onInput={(e) => setText((e.target as HTMLElement).textContent || "")}
+          onBlur={(e) => setText((e.target as HTMLElement).textContent || "")}
           aria-label="Editable circle text"
         >
+          {/* Uncontrolled contentEditable to preserve caret position during typing */}
           {text}
         </Box>
       </Box>
