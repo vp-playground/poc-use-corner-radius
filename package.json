@@ -8,7 +8,7 @@
     "changeset": "changeset",
     "checkTypes": "tsc -b --noEmit",
     "commit": "cz",
-    "dev": "pnpm run --filter template-vite-react-19 dev",
+    "dev": "pnpm run --filter demo-corner-radius dev",
     "lint": "run-p lint:*",
     "lint:cspell": "cspell --no-summary --no-progress",
     "lint:es": "eslint . --fix --report-unused-disable-directives --max-warnings 0",

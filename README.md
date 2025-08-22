@@ -1,41 +1,62 @@
-# 🌟 template-aio
+# Corner Radius PoC & Demo
 
-My all-in-one template for web development.
+This repository is a proof-of-concept exploring how to reconcile differences between **Figma corner radius behavior** and **CSS `border-radius`** in real components.
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/VdustR/template-aio)
+## Motivation
 
-<a href="https://studio.firebase.google.com/import?url=https%3A%2F%2Fgithub.com%2FVdustR%2Ftemplate-aio">
-  <picture>
-    <source
-      media="(prefers-color-scheme: dark)"
-      srcset="https://cdn.firebasestudio.dev/btn/open_dark_32.svg">
-    <source
-      media="(prefers-color-scheme: light)"
-      srcset="https://cdn.firebasestudio.dev/btn/open_light_32.svg">
-    <img
-      height="32"
-      alt="Open in Firebase Studio"
-      src="https://cdn.firebasestudio.dev/btn/open_blue_32.svg">
-  </picture>
-</a>
+Figma lets designers specify a corner radius that visually clamps itself to the shortest side, keeping pill / circle shapes consistent when resizing. Raw CSS requires you to derive and update that radius manually (or risk distorted shapes). This demo shows a lightweight runtime approach that mirrors Figma's feel without bespoke per-component logic.
 
-## 🎯 Release Library
+## Core Idea
 
-This repository uses **[changesets/action](https://github.com/changesets/action)**, a GitHub Action that automates release management by creating a pull request with version updates and changelog entries whenever changes are pushed to the `main` branch.
+Dynamic radius = `min(width, height, userInput)`
 
-To enable seamless releases, ensure GitHub Actions have sufficient permissions to write to and manage pull requests in your repository. Navigate to:
+So a large configured radius gracefully degrades to a circle (or pill) even as the element shrinks.
 
-**Settings → Code and automation → Actions → General → Workflow permissions** and adjust the following:
+## Implementation Highlights
 
-- ✅ Select **Read and write permissions**
-- ✅ Enable **Allow GitHub Actions to create and approve pull requests**
+- `useCornerRadius` custom hook encapsulates the logic (ResizeObserver + state)
+- Returns `ref` and an `sx` snippet with the computed `borderRadius`
+- No direct `style.setProperty` side effects; pure React state flow
+- Joy UI (MUI Joy) for styling & dark theme surface
+- Inline editable content region to visualize live reflow
+- Hug sizing toggles (auto width/height) + explicit min / max / padding controls for layout stress tests
 
-## 🤝 Contributing
+## Packages
 
-Contributions are welcome! Please read the [contributing guide](https://github.com/VdustR/template-aio/blob/main/CONTRIBUTING.md) for details.
+- `packages/demo-corner-radius` – the runnable demo (Vite + React + Joy UI)
+- Utility / shared configs (tsconfig, css-reset, dts) kept as separate workspaces for clarity
 
-## 📜 License
+## Running the Demo
 
-[MIT](./LICENSE)
+```bash
+pnpm install
+pnpm --filter @repo/demo-corner-radius dev
+```
 
-Copyright (c) 2024-2025 ViPro <vdustr@gmail.com> (<http://vdustr.dev>)
+Then open the shown local URL (usually `http://localhost:5173`).
+
+## Using the Hook Elsewhere
+
+```tsx
+const { ref, sx, radius } = useCornerRadius(desiredRadius);
+return (
+  <Box ref={ref} sx={{ ...sx /* other styles */ }}>
+    Content
+  </Box>
+);
+```
+
+Where `desiredRadius` is the designer's intended radius value.
+
+## Limitations / Future Ideas
+
+- Multi-corner asymmetric radii (Figma supports per-corner) could be added by returning four radii (currently uniform)
+- Layout thrash is minimal, but could batch with `requestAnimationFrame` for many instances
+- Option to compute radii purely on resize events from ancestors (skip element observation)
+- Provide CSS fallback for non-JS environments (static clamp / max)
+
+## License
+
+MIT © 2025 VdustR
+
+See `LICENSE` for full text.

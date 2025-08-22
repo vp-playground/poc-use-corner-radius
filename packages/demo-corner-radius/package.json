@@ -1,8 +1,8 @@
 {
-  "name": "@repo/template-vite-react-19",
-  "version": "0.7.10",
+  "name": "@repo/demo-corner-radius",
+  "version": "0.0.0",
   "private": true,
-  "description": "Vite + React 19 boilerplate",
+  "description": "Demo: dynamic corner radius circle using CSS variables",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -21,7 +21,6 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "vite-tsconfig-paths": "catalog:",
-    "vitest-browser-react": "catalog:"
+    "vite-tsconfig-paths": "catalog:"
   }
 }

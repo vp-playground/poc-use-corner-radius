@@ -19,7 +19,6 @@ All commit messages should adhere to the [Conventional Commits](https://www.conv
 **Examples:**
 
 - `feat: add new login button`
-- `fix(template-ts-lib): resolve issue with user authentication`
 - `docs: update README with setup instructions`
 - `chore: upgrade dependencies`
 
@@ -44,7 +43,6 @@ We use [Changesets](https://github.com/changesets/changesets) to manage versioni
    ```
 
    Changeset will then prompt you to:
-
    - Select which packages have been affected by your changes.
    - Choose the type of change for each package (major, minor, or patch).
    - Write a brief description of the change. This description will be used in the changelog.
