@@ -68,7 +68,7 @@ const editableTextBaseSx: SxProps = {
   color: "inherit",
 };
 
-// OverlayEditable: visible text via underlying div, input captured by transparent textarea.
+// OverlayEditable: wrapper provides positioning; placeholder (hidden text) + textarea overlay both draw surface styles.
 interface OverlayEditableProps {
   boxRef: React.RefObject<HTMLDivElement | null>;
   text: string;
@@ -169,56 +169,70 @@ const OverlayEditable: React.FC<OverlayEditableProps> = ({
 }) => {
   const taRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Extract visual props (borderWidth) from layout; outer wrapper should stay style-less (size only)
+  const { borderWidth, ...restLayout } = layout;
+
   return (
     <Box
       ref={boxRef}
       sx={{
-        ...styles.circle,
-        ...radiusSx,
-        ...layout,
-        position: "relative", // ensure positioning context
+        position: "relative", // only purpose: positioning context for textarea
       }}
       onClick={() => taRef.current?.focus()}
       role="group"
       aria-label="Editable circle text"
     >
-      <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
-        {/* Visible text (for layout & display) */}
-        <Box
-          aria-hidden
-          sx={{
-            ...editableTextBaseSx,
-            pointerEvents: "none",
-            minHeight: "1.2em",
-            opacity: 0, // hidden placeholder just for sizing
-          }}
-        >
-          {text}
-        </Box>
-        {/* Invisible textarea overlay (captures input) */}
-        <Box
-          component="textarea"
-          ref={taRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          sx={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            m: 0,
-            border: 0,
-            outline: 0,
-            background: "transparent",
-            ...editableTextBaseSx,
-            resize: "none",
-            p: 0,
-            cursor: "text",
-            overflow: "hidden",
-          }}
-          aria-label="Editable text input overlay"
-        />
+      {/* Placeholder (painted surface + hidden text). Carries sizing, padding, border, background. */}
+      <Box
+        aria-hidden
+        sx={{
+          ...editableTextBaseSx,
+          ...restLayout,
+          backgroundColor: "primary.softBg",
+          borderStyle: "solid",
+          borderColor: "primary.outlinedBorder",
+          borderWidth: borderWidth ?? 0,
+          borderRadius: radiusSx.borderRadius,
+          transition: "border-radius .2s ease",
+          fontSize: 24,
+          fontWeight: 600,
+          textAlign: "center",
+          color: "transparent", // hide text but keep box painting
+          pointerEvents: "none",
+          minHeight: "1.2em",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {text}
       </Box>
+      {/* Textarea overlay (paints same surface to avoid visual shift) */}
+      <Box
+        component="textarea"
+        ref={taRef}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        sx={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          m: 0,
+          outline: 0,
+          resize: "none",
+          p: 0,
+          overflow: "hidden",
+          cursor: "text",
+          background: "transparent",
+          border: 0,
+          ...editableTextBaseSx,
+          ...restLayout,
+          fontSize: 24,
+          fontWeight: 600,
+          textAlign: "center",
+          color: "primary.softColor",
+        }}
+        aria-label="Editable text input overlay"
+      />
     </Box>
   );
 };
@@ -243,13 +257,8 @@ const App: React.FC = () => {
     ref: boxRef,
     sx: radiusSx,
     size,
-  } = useCornerRadius(radiusInput, [
-    text,
-    paddingValue,
-    borderWidth,
-    hugHeight,
-    hugWidth,
-  ]);
+    reCalc,
+  } = useCornerRadius(radiusInput);
   // Refs to track latest measured size while in hug mode without triggering lint on state updates inside effect
   const hugHeightMeasuredRef = useRef("");
   const hugWidthMeasuredRef = useRef("");
@@ -260,7 +269,10 @@ const App: React.FC = () => {
     if (hugWidth && size.w) hugWidthMeasuredRef.current = `${size.w}px`;
   }, [hugWidth, size.w]);
 
-  // (No longer need manual observer logic; handled inside hook)
+  // Re-measure proactively when hugging and internal layout-affecting values change (safety net)
+  useEffect(() => {
+    if (hugHeight || hugWidth) reCalc();
+  }, [text, paddingValue, borderWidth, hugHeight, hugWidth, reCalc]);
 
   const onRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value || 0);

@@ -7,7 +7,6 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
  */
 export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
   inputRadius: number,
-  deps: ReadonlyArray<unknown> = [],
 ) {
   const ref = useRef<T | null>(null);
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
@@ -22,23 +21,29 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
     setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
   }, []);
 
-  // Stable key for dependency list without spreading arbitrary array (satisfies lint rules)
-  const depsKey = JSON.stringify(deps);
-
   // Initial + observe resize
   useLayoutEffect(() => {
     measure();
     const el = ref.current;
     if (!el || !("ResizeObserver" in window)) return;
-    const ro = new ResizeObserver(() => measure());
+    let frame: number | null = null;
+    const ro = new ResizeObserver(() => {
+      if (frame != null) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        measure();
+      });
+    });
     ro.observe(el);
-    return () => ro.disconnect();
+    return () => {
+      if (frame != null) cancelAnimationFrame(frame);
+      ro.disconnect();
+    };
   }, [measure]);
-
-  // Re-measure when inputRadius or any external layout-affecting deps change
+  // Re-measure when inputRadius changes (only affects resolved value, but in case layout ties to radius via styles)
   useLayoutEffect(() => {
     measure();
-  }, [inputRadius, measure, depsKey]);
+  }, [inputRadius, measure]);
 
   const resolved = Math.min(
     inputRadius,
@@ -48,7 +53,7 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
 
   const sx = { borderRadius: `${resolved}px` } as const;
 
-  return { ref, sx, radius: resolved, size };
+  return { ref, sx, radius: resolved, size, reCalc: measure };
 }
 
 export type UseCornerRadiusReturn = ReturnType<typeof useCornerRadius>;
