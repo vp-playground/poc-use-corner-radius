@@ -48,6 +48,9 @@ catalogs:
     '@total-typescript/ts-reset':
       specifier: ^0.6.1
       version: 0.6.1
+    '@types/big.js':
+      specifier: ^6.2.2
+      version: 6.2.2
     '@types/fs-extra':
       specifier: ^11.0.4
       version: 11.0.4
@@ -72,6 +75,9 @@ catalogs:
     babel-plugin-react-compiler:
       specifier: 19.1.0-rc.2
       version: 19.1.0-rc.2
+    big.js:
+      specifier: ^6.2.2
+      version: 6.2.2
     commitizen:
       specifier: ^4.3.1
       version: 4.3.1
@@ -326,6 +332,9 @@ importers:
       '@types/react-dom':
         specifier: 'catalog:'
         version: 19.1.5(@types/react@19.1.6)
+      big.js:
+        specifier: 'catalog:'
+        version: 6.2.2
       react:
         specifier: 'catalog:'
         version: 19.1.0
@@ -333,6 +342,9 @@ importers:
         specifier: 'catalog:'
         version: 19.1.0(react@19.1.0)
     devDependencies:
+      '@types/big.js':
+        specifier: 'catalog:'
+        version: 6.2.2
       vite-tsconfig-paths:
         specifier: 'catalog:'
         version: 5.1.4(typescript@5.8.3)(vite@7.0.5(@types/node@24.1.0)(jiti@2.4.2)(lightningcss@1.30.1)(tsx@4.20.3)(yaml@2.8.0))
@@ -1659,6 +1671,9 @@ packages:
   '@types/babel__traverse@7.20.7':
     resolution: {integrity: sha512-dkO5fhS7+/oos4ciWxyEyjWe48zmG6wbCheo/G2ZnHx4fs3EU6YC6UM8rk56gAjNJ9P3MTH2jo5jb92/K6wbng==}
 
+  '@types/big.js@6.2.2':
+    resolution: {integrity: sha512-e2cOW9YlVzFY2iScnGBBkplKsrn2CsObHQ2Hiw4V1sSyiGbgWL8IyqE3zFi1Pt5o1pdAtYkDAIsF3KKUPjdzaA==}
+
   '@types/chai@5.2.2':
     resolution: {integrity: sha512-8kB30R7Hwqf40JPiKhVzodJs2Qc1ZJ5zuT3uzw5Hq/dhNCl3G3l83jfpdI1e20BP348+fV7VIL/+FxaXkqBmWg==}
 
@@ -2047,6 +2062,9 @@ packages:
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
     engines: {node: '>=4'}
+
+  big.js@6.2.2:
+    resolution: {integrity: sha512-y/ie+Faknx7sZA5MfGA2xKlu0GDv8RWrXGsmlteyJQ2lvoKv9GBK/fpRMc2qlSoBAgNxrixICFCBefIq8WCQpQ==}
 
   birecord@0.1.1:
     resolution: {integrity: sha512-VUpsf/qykW0heRlC8LooCq28Kxn3mAqKohhDG/49rrsQ1dT1CXyj/pgXS+5BSRzFTR/3DyIBOqQOrGyZOh71Aw==}
@@ -6191,6 +6209,8 @@ snapshots:
     dependencies:
       '@babel/types': 7.28.1
 
+  '@types/big.js@6.2.2': {}
+
   '@types/chai@5.2.2':
     dependencies:
       '@types/deep-eql': 4.0.2
@@ -6637,6 +6657,8 @@ snapshots:
   better-path-resolve@1.0.0:
     dependencies:
       is-windows: 1.0.2
+
+  big.js@6.2.2: {}
 
   birecord@0.1.1: {}
 

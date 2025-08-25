@@ -7,6 +7,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
  */
 export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
   inputRadius: number,
+  deps: ReadonlyArray<unknown> = [],
 ) {
   const ref = useRef<T | null>(null);
   const [size, setSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
@@ -21,6 +22,9 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
     setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
   }, []);
 
+  // Stable key for dependency list without spreading arbitrary array (satisfies lint rules)
+  const depsKey = JSON.stringify(deps);
+
   // Initial + observe resize
   useLayoutEffect(() => {
     measure();
@@ -31,10 +35,10 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
     return () => ro.disconnect();
   }, [measure]);
 
-  // Re-measure when inputRadius changes (in case element size depends on it indirectly)
+  // Re-measure when inputRadius or any external layout-affecting deps change
   useLayoutEffect(() => {
     measure();
-  }, [inputRadius, measure]);
+  }, [inputRadius, measure, depsKey]);
 
   const resolved = Math.min(
     inputRadius,
