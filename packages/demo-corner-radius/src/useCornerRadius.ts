@@ -14,7 +14,10 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
   const measure = useCallback(() => {
     const el = ref.current;
     if (!el) return;
-    const { offsetWidth: w, offsetHeight: h } = el;
+    const rect = el.getBoundingClientRect();
+    // Use rect (includes fractional pixels, border, padding) and always round up
+    const w = Math.ceil(rect.width);
+    const h = Math.ceil(rect.height);
     setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
   }, []);
 

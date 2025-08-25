@@ -1,6 +1,6 @@
 import type { SxProps } from "@mui/joy/styles/types";
 import { Box, Checkbox, Input, Typography } from "@mui/joy";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useCornerRadius } from "./useCornerRadius";
 
 const styles = {
@@ -33,7 +33,6 @@ const styles = {
     justifyContent: "center",
   },
   circle: {
-    // dynamic size for demo
     width: 240,
     height: 240,
     display: "flex",
@@ -44,9 +43,9 @@ const styles = {
     fontSize: 24,
     fontWeight: 600,
     userSelect: "none",
-    border: "2px solid",
+    borderStyle: "solid",
+    borderWidth: 2,
     borderColor: "primary.outlinedBorder",
-    // The magic: use the CSS variable
     borderRadius: "var(--corner-radius)",
     position: "relative",
     overflow: "hidden",
@@ -54,11 +53,85 @@ const styles = {
     transition: "border-radius .2s ease",
     textAlign: "center",
   },
-  editable: {
-    outline: 0,
-  },
+  editable: { outline: 0 },
   hint: { fontSize: 12, opacity: 0.6 },
 } satisfies Record<string, SxProps>;
+
+// OverlayEditable: visible text via underlying div, input captured by transparent textarea.
+interface OverlayEditableProps {
+  boxRef: React.RefObject<HTMLDivElement | null>;
+  text: string;
+  setText: (v: string) => void;
+  radiusSx: any; // from hook
+  layout: Record<string, any>;
+}
+
+const OverlayEditable: React.FC<OverlayEditableProps> = ({
+  boxRef,
+  text,
+  setText,
+  radiusSx,
+  layout,
+}) => {
+  const taRef = useRef<HTMLTextAreaElement | null>(null);
+
+  return (
+    <Box
+      ref={boxRef}
+      sx={{
+        ...styles.circle,
+        ...radiusSx,
+        ...layout,
+        position: "relative", // ensure positioning context
+      }}
+      onClick={() => taRef.current?.focus()}
+      role="group"
+      aria-label="Editable circle text"
+    >
+      <Box sx={{ position: "relative", width: "100%", height: "100%" }}>
+        {/* Visible text (for layout & display) */}
+        <Box
+          aria-hidden
+          sx={{
+            pointerEvents: "none",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            minHeight: "1.2em",
+            opacity: 0, // now hidden placeholder just for sizing
+          }}
+        >
+          {text}
+        </Box>
+        {/* Invisible textarea overlay (captures input) */}
+        <Box
+          component="textarea"
+          ref={taRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            m: 0,
+            border: 0,
+            outline: 0,
+            background: "transparent",
+            font: "inherit",
+            fontWeight: "inherit",
+            textAlign: "inherit",
+            resize: "none",
+            color: "inherit",
+            p: 0,
+            cursor: "text",
+            overflow: "hidden",
+          }}
+          aria-label="Editable text input overlay"
+        />
+      </Box>
+    </Box>
+  );
+};
 
 const App: React.FC = () => {
   const [radiusInput, setRadiusInput] = useState(9999); // large default => circle
@@ -76,6 +149,7 @@ const App: React.FC = () => {
   const [maxWidthValue, setMaxWidthValue] = useState("");
   const [hugWidth, setHugWidth] = useState(true);
   const [paddingValue, setPaddingValue] = useState("16px 24px");
+  const [borderWidth, setBorderWidth] = useState(2);
 
   // (No longer need manual observer logic; handled inside hook)
 
@@ -184,14 +258,25 @@ const App: React.FC = () => {
             onChange={(e) => setPaddingValue(e.target.value)}
             sx={{ width: 180 }}
           />
+          <Typography level="title-sm" sx={{ minWidth: 64 }}>
+            Border
+          </Typography>
+          <Input
+            type="number"
+            value={borderWidth}
+            onChange={(e) => setBorderWidth(Number(e.target.value) || 0)}
+            slotProps={{ input: { min: 0 } }}
+            sx={{ width: 100 }}
+          />
         </Box>
       </Box>
       <Box sx={styles.circleWrapper}>
-        <Box
-          ref={boxRef}
-          sx={{
-            ...styles.circle,
-            ...radiusSx,
+        <OverlayEditable
+          boxRef={boxRef}
+          text={text}
+          setText={setText}
+          radiusSx={radiusSx}
+          layout={{
             height: hugHeight ? "auto" : heightValue || undefined,
             width: hugWidth ? "auto" : widthValue || undefined,
             minHeight: minHeightValue || undefined,
@@ -199,15 +284,9 @@ const App: React.FC = () => {
             minWidth: minWidthValue || undefined,
             maxWidth: maxWidthValue || undefined,
             padding: paddingValue || undefined,
+            borderWidth,
           }}
-          contentEditable
-          suppressContentEditableWarning
-          onBlur={(e) => setText((e.target as HTMLElement).textContent || "")}
-          aria-label="Editable circle text"
-        >
-          {/* Uncontrolled contentEditable to preserve caret position during typing */}
-          {text}
-        </Box>
+        />
       </Box>
     </Box>
   );
