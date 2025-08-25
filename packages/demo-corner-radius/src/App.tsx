@@ -62,7 +62,7 @@ const styles = {
 
 const App: React.FC = () => {
   const [radiusInput, setRadiusInput] = useState(9999); // large default => circle
-  const { ref: boxRef, sx: radiusSx } = useCornerRadius(radiusInput);
+  const { ref: boxRef, sx: radiusSx, size } = useCornerRadius(radiusInput);
   // Keep an internal label but don't re-render on every keystroke inside the contentEditable element
   // to avoid caret jumping to the start. We'll only commit text on blur.
   const [text, setText] = useState("Corner Radius");
@@ -109,7 +109,7 @@ const App: React.FC = () => {
           </Typography>
           <Input
             placeholder="28px"
-            value={hugHeight ? "(auto)" : heightValue}
+            value={hugHeight ? (size.h ? `${size.h}px` : "") : heightValue}
             disabled={hugHeight}
             onChange={(e) => setHeightValue(e.target.value)}
             sx={{ width: 140 }}
@@ -129,7 +129,14 @@ const App: React.FC = () => {
           <Checkbox
             label="Hug"
             checked={hugHeight}
-            onChange={(e) => setHugHeight(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              if (!checked) {
+                // leaving hug mode: lock the current measured size
+                if (size.h) setHeightValue(`${size.h}px`);
+              }
+              setHugHeight(checked);
+            }}
           />
         </Box>
         <Box sx={styles.controlRow}>
@@ -138,7 +145,7 @@ const App: React.FC = () => {
           </Typography>
           <Input
             placeholder="240px"
-            value={hugWidth ? "(auto)" : widthValue}
+            value={hugWidth ? (size.w ? `${size.w}px` : "") : widthValue}
             disabled={hugWidth}
             onChange={(e) => setWidthValue(e.target.value)}
             sx={{ width: 140 }}
@@ -158,7 +165,13 @@ const App: React.FC = () => {
           <Checkbox
             label="Hug"
             checked={hugWidth}
-            onChange={(e) => setHugWidth(e.target.checked)}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              if (!checked) {
+                if (size.w) setWidthValue(`${size.w}px`);
+              }
+              setHugWidth(checked);
+            }}
           />
         </Box>
         <Box sx={styles.controlRow}>

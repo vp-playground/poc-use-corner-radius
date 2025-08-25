@@ -41,7 +41,7 @@ export function useCornerRadius<T extends HTMLElement = HTMLDivElement>(
 
   const sx = { borderRadius: `${resolved}px` } as const;
 
-  return { ref, sx, radius: resolved };
+  return { ref, sx, radius: resolved, size };
 }
 
 export type UseCornerRadiusReturn = ReturnType<typeof useCornerRadius>;
